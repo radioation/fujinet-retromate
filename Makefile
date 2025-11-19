@@ -1,5 +1,6 @@
-PRODUCT = hello
-PLATFORMS = coco apple2 atari c64 adam msdos msxrom
+PRODUCT = fn_retromate
+# PLATFORMS = coco apple2 atari c64 adam msdos msxrom
+PLATFORMS = atari
 
 # You can run 'make <platform>' to build for a specific platform,
 # or 'make <platform>/<target>' for a platform-specific target.
@@ -18,7 +19,7 @@ SRC_DIRS = src src/%PLATFORM%
 # - a URL to a git repo
 # - empty which will use whatever is the latest
 # - undefined, no fujinet-lib will be used
-FUJINET_LIB = 
+FUJINET_LIB = 4.8.2
 
 # Define extra dirs ("combos") that expand with a platform.
 # Format: platform+=combo1,combo2
