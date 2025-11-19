@@ -1,22 +1,38 @@
-#include <fujinet-fuji.h>
-#ifndef _CMOC_VERSION_
-#include <stdio.h>
-#include <string.h>
-#endif /* _CMOC_VERSION_ */
+/*
+ *  main.c
+ *  RetroMate
+ *
+ *  By S. Wessels, 2025.
+ *  This is free and unencumbered software released into the public domain.
+ *
+ */
 
-AdapterConfigExtended ace;
+#include "global.h"
 
-void main()
-{
-  printf("Searching for FujiNet...\n");
-  if (!fuji_get_adapter_config_extended(&ace))
-    strcpy(ace.fn_version, "FAIL");
+/*-----------------------------------------------------------------------*/
+int main() {
+    log_init(&global.view.terminal, 80, plat_core_get_rows() - 1);
+    log_init(&global.view.info_panel, plat_core_get_cols() - plat_core_get_status_x(), plat_core_get_rows());
 
-  printf("FujiNet: %-14s\n", ace.fn_version);
+    plat_core_init();
+    plat_net_init();
 
-  /* Loop forever so message stays on screen */
-  while (1)
-    ;
+    global.view.info_panel.clip = true;
+    app_set_state(APP_STATE_OFFLINE);
 
-  return;
+    while (!global.app.quit) {
+        plat_core_key_input(&global.os.input_event);
+        app_draw_update();
+        global.app.selection = menu_tick();
+        global.app.tick();
+        plat_net_update();
+        plat_draw_update();
+    }
+
+    plat_net_shutdown();
+    log_shutdown(&global.view.info_panel);
+    log_shutdown(&global.view.terminal);
+    plat_core_shutdown();
+
+    return 0;
 }
