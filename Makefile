@@ -1,6 +1,6 @@
 PRODUCT = fn_retromate
 # PLATFORMS = coco apple2 atari c64 adam msdos msxrom
-PLATFORMS = atari
+PLATFORMS = atari atarixl
 
 # You can run 'make <platform>' to build for a specific platform,
 # or 'make <platform>/<target>' for a platform-specific target.
@@ -26,6 +26,7 @@ FUJINET_LIB = 4.8.2
 PLATFORM_COMBOS = \
   c64+=commodore \
   atarixe+=atari \
+  atarixl+=atari \
   msxrom+=msx \
   msxdos+=msx
 

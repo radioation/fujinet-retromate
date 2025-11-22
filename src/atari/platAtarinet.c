@@ -10,6 +10,7 @@
 #include <atari.h>
 
 #include <string.h>
+#include <stdio.h>
 
 #include "../global.h"
 
@@ -20,11 +21,11 @@
 #pragma code-name(push, "SHADOW_RAM")
 
 
-char devicespec[256];    // Buffer for the device spec
+char devicespec[64];
 uint16_t bytes_waiting;
 uint8_t conn_status;
 uint8_t err;
-uint8_t rxbuf[8192];     // Receive buffer
+char rxbuf[1518]; // eth_buffer.s lenght 1518
 
 char* fn_strerror( uint8_t ) {
     return "error";
@@ -62,7 +63,7 @@ void plat_net_init() {
 
 /*-----------------------------------------------------------------------*/
 void plat_net_connect(const char *server_name, int server_port) {
-    uint32_t server;
+    //uint32_t server;
     int8_t ret = 0;
 
 /* internal to fujinet
@@ -80,6 +81,8 @@ void plat_net_connect(const char *server_name, int server_port) {
     }
 
 */
+    //snprintf( devicespec, "N:TELNET://%s:%d/", server_name, server_port );
+    strcpy( devicespec, "N:TELNET://FREECHESS.ORG:5000/" );
     log_add_line(&global.view.terminal, "Connecting to server", -1);
     plat_draw_log(&global.view.terminal, 0, 0, false);
     //if (tcp_connect(server, server_port, fics_tcp_recv)) {
@@ -114,6 +117,7 @@ bool plat_net_update() {
 */
     network_status( devicespec, &bytes_waiting, &conn_status, &err );
     if( conn_status && bytes_waiting ) {
+        if( bytes_waiting > sizeof(rxbuf) ) 
         network_read( devicespec, rxbuf, bytes_waiting );
     } 
 

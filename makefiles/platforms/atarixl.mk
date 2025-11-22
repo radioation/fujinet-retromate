@@ -28,4 +28,4 @@ $(ATRBOOT): | $(CACHE_PLATFORM)
 	curl -L -o $@ $(PICOBOOT_DOWNLOAD_URL)/$(PICOBOOT_BIN)
 
 
-LDFLAGS_EXTRA_ATARI = -C src/atari/atari.cfg
+LDFLAGS_EXTRA_ATARIXL = -C src/atari/atarixl.cfg
