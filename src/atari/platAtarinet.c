@@ -27,8 +27,24 @@ uint8_t conn_status;
 uint8_t err;
 char rxbuf[1518]; // eth_buffer.s lenght 1518
 
-char* fn_strerror( uint8_t ) {
-    return "error";
+char* fn_strerror( uint8_t e ) {
+    switch (e)
+    {
+        case FN_ERR_OK:
+            return "No error";
+        case FN_ERR_IO_ERROR:
+            return "There was IO error/issue with the device";
+        case FN_ERR_BAD_CMD:
+            return "Function called with bad arguments";
+        case FN_ERR_OFFLINE:
+           return "The device is offline";
+        case FN_ERR_WARNING:
+           return "Device specific non-fatal warning issued";
+        case FN_ERR_NO_DEVICE:
+           return "There is no network device";
+        default:
+            return "Unkown Error";
+    }
 }
 
 /*-----------------------------------------------------------------------*/
