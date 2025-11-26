@@ -18,9 +18,6 @@
 #pragma code-name(push, "LOWCODE")
 #endif
 
-#ifdef __ATARIXL__
-#pragma code-name(push, "SHADOW_RAM")
-#endif
 
 /*-----------------------------------------------------------------------*/
 static void app_terminal() {
@@ -360,6 +357,3 @@ void app_user_input() {
 #pragma code-name(pop)
 #endif
 
-#ifdef __ATARIXL__
-#pragma code-name(pop)
-#endif

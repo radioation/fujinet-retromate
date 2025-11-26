@@ -82,7 +82,6 @@ atari_t atari = {
     0                  // CHAR_ROM
 };
 
-#pragma code-name(push, "SHADOW_RAM2")
 
 /*-----------------------------------------------------------------------*/
 // x in Character coords, y in Graphics coords
@@ -208,9 +207,6 @@ void plat_draw_highlight(uint8_t position, uint8_t color) {
     }
 }
 
-#pragma code-name(pop)
-
-#pragma code-name(push, "SHADOW_RAM")
 
 /*-----------------------------------------------------------------------*/
 void plat_draw_log(tLog *log, uint8_t x, uint8_t y, bool) {
@@ -325,7 +321,6 @@ void plat_draw_text(uint8_t x, uint8_t y, const char *text, uint8_t len) {
     }
 }
 
-#pragma code-name(pop)
 
 /*-----------------------------------------------------------------------*/
 uint8_t plat_draw_ui_help_callback(menu_t *m, void *data) {

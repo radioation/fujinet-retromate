@@ -18,7 +18,6 @@
 
 #include "fujinet-network.h"
 
-#pragma code-name(push, "SHADOW_RAM")
 
 
 char devicespec[64];
@@ -160,4 +159,3 @@ void plat_net_shutdown() {
     plat_net_disconnect();
 }
 
-#pragma code-name(pop)

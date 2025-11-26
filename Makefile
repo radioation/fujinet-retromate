@@ -1,6 +1,6 @@
 PRODUCT = fn_retromate
 # PLATFORMS = coco apple2 atari c64 adam msdos msxrom
-PLATFORMS = atari atarixl
+PLATFORMS = atari 
 
 # You can run 'make <platform>' to build for a specific platform,
 # or 'make <platform>/<target>' for a platform-specific target.
