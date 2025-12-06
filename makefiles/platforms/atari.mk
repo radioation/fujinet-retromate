@@ -28,4 +28,5 @@ $(ATRBOOT): | $(CACHE_PLATFORM)
 	curl -L -o $@ $(PICOBOOT_DOWNLOAD_URL)/$(PICOBOOT_BIN)
 
 
-LDFLAGS_EXTRA_ATARI = -C src/atari/atari.cfg
+LDFLAGS_EXTRA_ATARI = -C src/atari/atari.cfg --mapfile ./fnrm.map -Ln ./fnrm.lbl --debug-info  -Wl -D__SYSTEM_CHECK__=1
+CFLAGS_EXTRA_ATARI = -Os

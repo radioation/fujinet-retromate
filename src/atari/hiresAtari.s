@@ -17,13 +17,15 @@
 
 ;-----------------------------------------------------------------------
 ; Display-list related defenitions
-scrn     = $A000                                 ; screen starts here
-scnd     = $B000                                 ; lower part of screen here
+scrn     = $2000                                 ; screen starts here
+scnd     = $3000                                 ; lower part of screen here
 top      = ((scnd - scrn) / $28)                 ; display list entries before scnd
 bot      = ($c0-top)                             ; display list entries after scnd
 gfx_mode = $0f                                   ; mode to run the screen at
-txt_scrn = $BC00
+txt_scrn = $3C00
 txt_mode = $02                                   ; mode to run the screen at
+
+
 
 ;-----------------------------------------------------------------------
 ; Display list - mode 0x0f (320x192, 2 color).
@@ -36,7 +38,7 @@ hires_list:
         .repeat top-1                            ; 96 lines of mode $0x (incl LMS row above)
             .byte gfx_mode
         .endrep
-        .byte $40 +gfx_mode, <(scnd), >(scnd)    ; clear the 4k boundry and start another row of mode $0x
+        .byte $40 +gfx_mode, <scnd, >scnd        ; clear the 4k boundry and start another row of mode $0x
         .repeat bot-1                            ; another 96 lines of mode $0x (incl. LMS row above)
             .byte gfx_mode
         .endrep

@@ -66,6 +66,8 @@ static int plat_net_make_ascii(const char *text) {
 void plat_net_init() {
     //if (ip65_init(ETH_INIT_DEFAULT)) {  // true if error, false otherwise.
     int8_t ret = network_init();
+
+    //(*(uint8_t*)0x41) = 0; // Quiet you.
      
     if ( ret ) { // returns status/error FN_ERR_* values  FN_ERR_OK ==0x00, so non zero is error
         log_add_line(&global.view.terminal, "Initializing Network", -1);
@@ -130,12 +132,12 @@ bool plat_net_update() {
     }
 
 */
-    network_status( devicespec, &bytes_waiting, &conn_status, &err );
-    if( conn_status && bytes_waiting ) {
-        if( bytes_waiting > sizeof(rxbuf) ) 
-        network_read( devicespec, rxbuf, bytes_waiting );
-    } 
-
+//    network_status( devicespec, &bytes_waiting, &conn_status, &err );
+//    if( conn_status && bytes_waiting ) {
+//        if( bytes_waiting > sizeof(rxbuf) ) 
+//        network_read( devicespec, rxbuf, bytes_waiting );
+//    } 
+//
     
     return 0;
 }
