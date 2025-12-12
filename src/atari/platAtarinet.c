@@ -25,6 +25,7 @@ uint16_t bytes_waiting;
 uint8_t conn_status;
 uint8_t err;
 char rxbuf[1518]; // eth_buffer.s lenght 1518
+uint8_t tick;
 
 char* fn_strerror( uint8_t e ) {
     switch (e)
@@ -132,13 +133,15 @@ bool plat_net_update() {
     }
 
 */
-//    network_status( devicespec, &bytes_waiting, &conn_status, &err );
-//    if( conn_status && bytes_waiting ) {
-//        if( bytes_waiting > sizeof(rxbuf) ) 
-//        network_read( devicespec, rxbuf, bytes_waiting );
-//    } 
-//
-    
+    tick++;
+    if( tick % 120  == 0 ) {
+      network_status( devicespec, &bytes_waiting, &conn_status, &err );
+      if( conn_status && bytes_waiting ) {
+        if( bytes_waiting > sizeof(rxbuf) ) 
+          network_read( devicespec, rxbuf, bytes_waiting );
+      } 
+    }
+
     return 0;
 }
 
