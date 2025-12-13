@@ -15,15 +15,17 @@
 .import popa, popax, _hires_piece
 
 
+.segment "SCREENMEM"
+.res 8192
 ;-----------------------------------------------------------------------
 ; Display-list related defenitions
 scrn     = $2000                                 ; screen starts here
 scnd     = $3000                                 ; lower part of screen here
-top      = ((scnd - scrn) / $28)                 ; display list entries before scnd
-bot      = ($c0-top)                             ; display list entries after scnd
-gfx_mode = $0f                                   ; mode to run the screen at
-txt_scrn = $3C00
-txt_mode = $02                                   ; mode to run the screen at
+top      = ((scnd - scrn) / $28)                 ; display list entries before scnd (should be $66/102)
+bot      = ($c0-top)                             ; display list entries after scnd  (should be $5a/90) $5a*$28 = $e10 (3600 bytes)
+gfx_mode = $0f                                   ; mode to run the screen at GR8/AnticF
+txt_scrn = $3C00                                 ; overlaps GR8!? Also $28*$19=$3e8 gets us to $3C00 + 3e8 = 3fe8 (only 23 b left)
+txt_mode = $02                                   ; mode to run the screen at GR0/Antic2
 
 
 
@@ -34,7 +36,7 @@ txt_mode = $02                                   ; mode to run the screen at
 
 hires_list:
         .byte $70,$70,$70                        ; 24 blank lines
-        .byte $40 + gfx_mode,<scrn,>scrn         ; Mode $0x + LMS, setting screen memory to $9100
+        .byte $40 + gfx_mode,<scrn,>scrn         ; Mode $0x + LMS, setting screen memory to $2000 
         .repeat top-1                            ; 96 lines of mode $0x (incl LMS row above)
             .byte gfx_mode
         .endrep
@@ -47,7 +49,7 @@ hires_list:
 text_list:
         .byte $70,$70,$70                        ; 24 blank lines
         .byte $40 + txt_mode,<txt_scrn,>txt_scrn ; Mode $0x + LMS, setting screen memory to $9100
-        .repeat 24                               ; 96 lines of mode $0x (incl LMS row above)
+        .repeat 24                               ; 24 more rows of $02 (25 with LMS above)
             .byte txt_mode
         .endrep
         .byte $41,<text_list,>text_list          ; Vertical Blank jump to start of text_list
@@ -74,6 +76,7 @@ BASEHI:
 
 ;-----------------------------------------------------------------------
 
+.segment "CODE"
 
 ;-----------------------------------------------------------------------
 ; Init the hires screen with the display list

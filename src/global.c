@@ -53,9 +53,9 @@ global_t global = {
         // ui
         "Guest",                                    // user_name
         "",                                         // user_password
-        "10.25.50.61", // "freechess.org",                            // server_name
-        "6000", //"5000",                                     // server_port_str
-        6000, //  5000,                                       // server_port
+        "freechess.org",                            // server_name
+        "5000",                                     // server_port_str
+        5000,                                       // server_port
         0,                                          // my_rating
         "\x75",                                     // my_rating_type (in ascii 'u')
         NULL,                                       // my_game_type

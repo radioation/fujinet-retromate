@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../global.h"
 
@@ -18,32 +19,36 @@
 
 #include "fujinet-network.h"
 
-
-
+#pragma bss-name( push, "FUJI_BSS")
 char devicespec[64];
+char rxbuf[1518]; // ip_65 eth_buffer.s .res 1518 &  drivers/ethernetcombo.s drivers/ethernet.s stax #1518
 uint16_t bytes_waiting;
 uint8_t conn_status;
 uint8_t err;
-char rxbuf[1518]; // eth_buffer.s lenght 1518
 uint8_t tick;
+uint8_t res;
+int16_t bytes_read;
+#pragma bss-name( pop )
+
+
 
 char* fn_strerror( uint8_t e ) {
     switch (e)
     {
         case FN_ERR_OK:
-            return "No error";
+            return "OK";
         case FN_ERR_IO_ERROR:
-            return "There was IO error/issue with the device";
+            return "IO Error";
         case FN_ERR_BAD_CMD:
-            return "Function called with bad arguments";
+            return "bad cmd";
         case FN_ERR_OFFLINE:
-           return "The device is offline";
+           return "offline";
         case FN_ERR_WARNING:
-           return "Device specific non-fatal warning issued";
+           return "Warning issued";
         case FN_ERR_NO_DEVICE:
-           return "There is no network device";
+           return "no device";
         default:
-            return "Unkown Error";
+            return "Unknown";
     }
 }
 
@@ -65,102 +70,91 @@ static int plat_net_make_ascii(const char *text) {
 
 /*-----------------------------------------------------------------------*/
 void plat_net_init() {
-    //if (ip65_init(ETH_INIT_DEFAULT)) {  // true if error, false otherwise.
-    int8_t ret = network_init();
+    res = network_init();
 
-    //(*(uint8_t*)0x41) = 0; // Quiet you.
+    (*(uint8_t*)0x41) = 0; // Quiet you.
      
-    if ( ret ) { // returns status/error FN_ERR_* values  FN_ERR_OK ==0x00, so non zero is error
-        log_add_line(&global.view.terminal, "Initializing Network", -1);
+    if ( res ) { // returns status/error FN_ERR_* values  FN_ERR_OK ==0x00, so non zero is error
+        log_add_line(&global.view.terminal, "Init Network", -1);
         plat_draw_log(&global.view.terminal, 0, 0, false);
-        //app_error(true, ip65_strerror(ip65_error));
-        app_error(true, fn_strerror(ret));
+        app_error(true, fn_strerror(res));
     }
 }
 
 
 /*-----------------------------------------------------------------------*/
 void plat_net_connect(const char *server_name, int server_port) {
-    //uint32_t server;
-    int8_t ret = 0;
+    
+    //sprintf( devicespec, "N:TELNET://%s:%d/", server_name, server_port ); sprintf() adds ~1.5K to size.
+    strcpy( devicespec, "N:TELNET://");
+    strcpy( devicespec+11, server_name );
+    strcpy( devicespec+11 + strlen(server_name), ":" );
+    itoa( server_port,  devicespec+12 + strlen(server_name), 10 );
 
-/* internal to fujinet
-    log_add_line(&global.view.terminal, "Obtaining IP address", -1);
+    log_add_line(&global.view.terminal, "Connect to server", -1);
     plat_draw_log(&global.view.terminal, 0, 0, false);
-    if (dhcp_init()) {
-        app_error(true, ip65_strerror(ip65_error));
+
+    res = network_open( devicespec, OPEN_MODE_RW, OPEN_TRANS_NONE );
+    if( res ) {
+        app_error(true, fn_strerror(res));
     }
-
-    log_add_line(&global.view.terminal, "Resolving Server", -1);
-    plat_draw_log(&global.view.terminal, 0, 0, false);
-    server = dns_resolve(server_name);
-    if (!server) {
-        app_error(false, ip65_strerror(ip65_error));
-    }
-
-*/
-    //snprintf( devicespec, "N:TELNET://%s:%d/", server_name, server_port );
-    strcpy( devicespec, "N:TELNET://FREECHESS.ORG:5000/" );
-    log_add_line(&global.view.terminal, "Connecting to server", -1);
-    plat_draw_log(&global.view.terminal, 0, 0, false);
-    //if (tcp_connect(server, server_port, fics_tcp_recv)) {
-    //    app_error(false, ip65_strerror(ip65_error));
-    //}
-    ret = network_open( devicespec, OPEN_MODE_RW, OPEN_TRANS_NONE );
-    if( ret ) {
-        app_error(true, fn_strerror(ret));
-    }
-
-
-    log_add_line(&global.view.terminal, "Logging in, please be patient", -1);
+    log_add_line(&global.view.terminal, "Logging in", -1);
     plat_draw_log(&global.view.terminal, 0, 0, false);
 }
 
 /*-----------------------------------------------------------------------*/
 void plat_net_disconnect() {
-    //tcp_close();
     network_close(devicespec);
 }
 
 /*-----------------------------------------------------------------------*/
 bool plat_net_update() {
-/*
-    if (ip65_process()) {
-        // I am not sure what erors could be returned here
-        if (ip65_error >= IP65_ERROR_PORT_IN_USE) {
-            return 1;
+    // throttle SIO reads 
+    tick++;
+    if( tick % 120 ) return 0;
+
+    // network status gets bytes_waiting from DVSTAT, conn_status from DVSTAT+2
+    // and actual error code from DVSTAT+3 ( atari/src/fn_network/network_status.s)
+    if( network_status( devicespec, &bytes_waiting, &conn_status, &err ) == FN_ERR_OK ) {
+        // https://github.com/FujiNetWIFI/fujinet-firmware/wiki/N%3A-SIO-Command-%27S%27---Status
+        // 0	LO Byte of # of bytes waiting
+        // 1	HI Byte of # of bytes waiting
+        // 2	0=Disconnected, 1=Connected
+        // 3	Extended Error code
+        if( conn_status && bytes_waiting ) {
+            bytes_read = network_read( devicespec, rxbuf, bytes_waiting < sizeof( rxbuf ) ? bytes_waiting : sizeof( rxbuf ) );
+            if( bytes_read < 0 ) {
+                return 1;
+            }
+            if( bytes_read > 0 ) {
+              fics_tcp_recv( rxbuf, bytes_read ); 
+            }
+            return 0;
         }
     }
-
-*/
-    tick++;
-    if( tick % 120  == 0 ) {
-      network_status( devicespec, &bytes_waiting, &conn_status, &err );
-      if( conn_status && bytes_waiting ) {
-        if( bytes_waiting > sizeof(rxbuf) ) 
-          network_read( devicespec, rxbuf, bytes_waiting );
-      } 
-    }
-
-    return 0;
+    // Got an error if we're here. network_status returns either FN_ERR_OK or FN_ERR_IO_ERROR.
+    return 1;
 }
 
 /*-----------------------------------------------------------------------*/
 void plat_net_send(const char *text) {
-    log_add_line(&global.view.terminal, text, -1);
-/*
-    tcp_send((unsigned char *)atari.send_buffer, plat_net_make_ascii(text));
+  log_add_line(&global.view.terminal, text, -1);
+  /*
+   *
+   * Keeping this block to document 
+   *
+     tcp_send((unsigned char *)atari.send_buffer, plat_net_make_ascii(text));
     // Don't send \x0a in he buffer, send seprately.  I don't know why it
     // improves stability, but it absolutely does
     tcp_send((unsigned char *)"\x0a", 1);
-*/
+  */
 
-    network_write( devicespec, (unsigned char *)atari.send_buffer, plat_net_make_ascii(text));
-    network_write( devicespec, (unsigned char *)"\x0a", 1 );
+  network_write( devicespec, (unsigned char *)atari.send_buffer, plat_net_make_ascii(text));
+  network_write( devicespec, (unsigned char *)"\x0a", 1 );
 }
 
 /*-----------------------------------------------------------------------*/
 void plat_net_shutdown() {
-    plat_net_disconnect();
+  plat_net_disconnect();
 }
 
