@@ -90,9 +90,6 @@ static void fics_add_status_log(const char *str1, const char *str2) {
     log_add_line(&global.view.info_panel, global.view.scratch_buffer, ptr - global.view.scratch_buffer);
 }
 
-#ifdef __ATARIXL__
-#pragma code-name(push, "SHADOW_RAM")
-#endif
 
 /*-----------------------------------------------------------------------*/
 static void fics_add_stats(bool side) {
@@ -111,9 +108,6 @@ static void fics_add_stats(bool side) {
 }
 
 
-#ifdef __ATARIXL__
-#pragma code-name(pop)
-#endif
 
 /*-----------------------------------------------------------------------*/
 // Copy out data from src, up to the next ' ' in src, or till max_len
@@ -235,9 +229,6 @@ static void fics_next_number() {
     }
 }
 
-#ifdef __ATARIXL__
-#pragma code-name(push, "SHADOW_RAM")
-#endif
 
 /*-----------------------------------------------------------------------*/
 static void fics_next_word() {
@@ -768,6 +759,3 @@ void fics_tcp_recv(const unsigned char *buf, int len) {
 #pragma code-name(pop)
 #endif
 
-#ifdef __ATARIXL__
-#pragma code-name(pop)
-#endif

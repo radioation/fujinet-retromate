@@ -16,9 +16,9 @@ jobs:
         platform:
           # - adam
           # - apple2
-          # - atari
+           - atari
           # - c64
-          - coco
+          #- coco
           # - msdos
 
     container:

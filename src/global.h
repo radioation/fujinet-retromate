@@ -200,6 +200,7 @@ typedef struct _text {
     char *word_time;
     char *title_line1;
     char *title_line2;
+    char *title_line3;
 } text_t;
 
 

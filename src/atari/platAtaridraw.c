@@ -82,7 +82,6 @@ atari_t atari = {
     0                  // CHAR_ROM
 };
 
-#pragma code-name(push, "SHADOW_RAM2")
 
 /*-----------------------------------------------------------------------*/
 // x in Character coords, y in Graphics coords
@@ -208,9 +207,6 @@ void plat_draw_highlight(uint8_t position, uint8_t color) {
     }
 }
 
-#pragma code-name(pop)
-
-#pragma code-name(push, "SHADOW_RAM")
 
 /*-----------------------------------------------------------------------*/
 void plat_draw_log(tLog *log, uint8_t x, uint8_t y, bool) {
@@ -260,6 +256,7 @@ void plat_draw_set_text_bg_color(uint8_t) {
 void plat_draw_splash_screen() {
     uint8_t title1_len = strlen(global.text.title_line1);
     uint8_t title2_len = strlen(global.text.title_line2);
+    uint8_t title3_len = strlen(global.text.title_line3);
 
     // Clear the screen
     plat_draw_clrscr();
@@ -269,7 +266,8 @@ void plat_draw_splash_screen() {
 
     // Show credits and wait for key press
     plat_draw_text((SCREEN_TEXT_WIDTH - title1_len) / 2, SCREEN_TEXT_HEIGHT / 2 - 1, global.text.title_line1, title1_len);
-    plat_draw_text((SCREEN_TEXT_WIDTH - title2_len) / 2, SCREEN_TEXT_HEIGHT / 2 + 1, global.text.title_line2, title2_len);
+    plat_draw_text((SCREEN_TEXT_WIDTH - title2_len) / 2, SCREEN_TEXT_HEIGHT / 2 , global.text.title_line2, title2_len);
+    plat_draw_text((SCREEN_TEXT_WIDTH - title3_len) / 2, SCREEN_TEXT_HEIGHT / 2 + 1, global.text.title_line3, title3_len);
 
     hires_draw(SCREEN_TEXT_WIDTH / 2 - 2, SCREEN_DISPLAY_HEIGHT / 2 - 50 - SQUARE_DISPLAY_HEIGHT / 2,
                SQUARE_TEXT_WIDTH, SQUARE_DISPLAY_HEIGHT, ROP_CPY,
@@ -325,7 +323,6 @@ void plat_draw_text(uint8_t x, uint8_t y, const char *text, uint8_t len) {
     }
 }
 
-#pragma code-name(pop)
 
 /*-----------------------------------------------------------------------*/
 uint8_t plat_draw_ui_help_callback(menu_t *m, void *data) {

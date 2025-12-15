@@ -53,9 +53,9 @@ global_t global = {
         // ui
         "Guest",                                    // user_name
         "",                                         // user_password
-        "10.25.50.61", // "freechess.org",                            // server_name
-        "6000", //"5000",                                     // server_port_str
-        6000, //  5000,                                       // server_port
+        "freechess.org",                            // server_name
+        "5000",                                     // server_port_str
+        5000,                                       // server_port
         0,                                          // my_rating
         "\x75",                                     // my_rating_type (in ascii 'u')
         NULL,                                       // my_game_type
@@ -145,7 +145,8 @@ global_t global = {
         "  ",                                       // global.text.word_spaces
         "Strength: ",                               // global.text.word_strength
         "Time: ",                                   // global.text.word_time
-        "RetroMate Free Internet Chess Client",     // global.text.title_line1
-        "V1.02 by S. Wessels and O. Schmidt 2025",  // global.text.title_line2
+        "FujiNet - RetroMate",                      // global.text.title_line1
+        "Free Internet Chess Client",               // global.text.title_line2
+        "V1.03 by S. Wessels and O. Schmidt 2025",  // global.text.title_line3
     }
 };
