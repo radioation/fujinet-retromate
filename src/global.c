@@ -145,7 +145,8 @@ global_t global = {
         "  ",                                       // global.text.word_spaces
         "Strength: ",                               // global.text.word_strength
         "Time: ",                                   // global.text.word_time
-        "RetroMate Free Internet Chess Client",     // global.text.title_line1
-        "V1.02 by S. Wessels and O. Schmidt 2025",  // global.text.title_line2
+        "FujiNet - RetroMate",                      // global.text.title_line1
+        "Free Internet Chess Client",               // global.text.title_line2
+        "V1.03 by S. Wessels and O. Schmidt 2025",  // global.text.title_line3
     }
 };
