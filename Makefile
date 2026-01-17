@@ -37,3 +37,5 @@ include makefiles/toplevel-rules.mk
 #   coco/r2r:: coco/custom-step2
 # or
 #   apple2/disk: apple2/custom-step1 apple2/custom-step2
+
+LDFLAGS_EXTRA_ATARI = -C src/atari/atari.cfg --mapfile ./fnrm_atari.map -Ln ./fnrm_atari.lbl --debug-info  -Wl -D__SYSTEM_CHECK__=1
