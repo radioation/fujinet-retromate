@@ -20,7 +20,6 @@ unsigned char rxbuf[1518]; // ip_65 eth_buffer.s .res 1518 &  drivers/ethernetco
 uint16_t bytes_waiting;
 uint8_t conn_status;
 uint8_t err;
-uint8_t tick;
 uint8_t res;
 int16_t bytes_read;
 
@@ -81,9 +80,6 @@ void plat_net_disconnect() {
 
 /*-----------------------------------------------------------------------*/
 bool plat_net_update() {
-    // throttle read ? (may not be needed on apple)
-    tick++;
-    if( tick % 120 ) return 0;
 
     if( network_status( devicespec, &bytes_waiting, &conn_status, &err ) == FN_ERR_OK ) {
         if( conn_status && bytes_waiting ) {
