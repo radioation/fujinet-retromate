@@ -123,7 +123,6 @@ apple2_t apple2 = {
     SCREEN_TEXT_WIDTH, // terminal_display_width
 };
 
-#pragma code-name(push, "LC")
 
 /*-----------------------------------------------------------------------*/
 // x in Character coords, y in Graphics coords
@@ -326,7 +325,6 @@ void plat_draw_square(uint8_t position) {
                hires_pieces[(piece & 127) - 1][inv]);
 }
 
-#pragma code-name(pop)
 
 /*-----------------------------------------------------------------------*/
 void plat_draw_text(uint8_t x, uint8_t y, const char *text, uint8_t len) {

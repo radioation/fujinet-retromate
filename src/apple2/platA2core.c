@@ -16,7 +16,6 @@
 
 #include "platA2.h"
 
-#pragma code-name(push, "LC")
 
 /*-----------------------------------------------------------------------*/
 void plat_core_active_term(bool active) {
@@ -177,4 +176,3 @@ void plat_core_shutdown() {
     hires_done();
 }
 
-#pragma code-name(pop)

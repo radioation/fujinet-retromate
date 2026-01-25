@@ -23,7 +23,6 @@ uint8_t err;
 uint8_t res;
 int16_t bytes_read;
 
-#pragma code-name(push, "LC")
 
 char* fn_strerror( uint8_t e ) {
     switch (e)
@@ -111,4 +110,3 @@ void plat_net_shutdown() {
     plat_net_disconnect();
 }
 
-#pragma code-name(pop)
