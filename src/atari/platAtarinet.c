@@ -109,7 +109,7 @@ void plat_net_disconnect() {
 
 /*-----------------------------------------------------------------------*/
 bool plat_net_update() {
-    // throttle SIO reads 
+    // throttle SIO reads (interferes with keyboard)
     tick++;
     if( tick % 120 ) return 0;
 
@@ -121,15 +121,17 @@ bool plat_net_update() {
         // 1	HI Byte of # of bytes waiting
         // 2	0=Disconnected, 1=Connected
         // 3	Extended Error code
-        if( conn_status && bytes_waiting ) {
-            bytes_read = network_read( devicespec, rxbuf, bytes_waiting < sizeof( rxbuf ) ? bytes_waiting : sizeof( rxbuf ) );
-            if( bytes_read < 0 ) {
-                return 1;
+        if( conn_status  ){
+            if(  bytes_waiting ) {
+                bytes_read = network_read( devicespec, rxbuf, bytes_waiting < sizeof( rxbuf ) ? bytes_waiting : sizeof( rxbuf ) );
+                if( bytes_read < 0 ) {
+                    return 1;
+                }
+                if( bytes_read > 0 ) {
+                  fics_tcp_recv( rxbuf, bytes_read ); 
+                }
+                return 0;
             }
-            if( bytes_read > 0 ) {
-              fics_tcp_recv( rxbuf, bytes_read ); 
-            }
-            return 0;
         }
     }
     // Got an error if we're here. network_status returns either FN_ERR_OK or FN_ERR_IO_ERROR.

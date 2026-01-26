@@ -21,6 +21,7 @@ uint16_t bytes_waiting;
 uint8_t conn_status;
 uint8_t err;
 uint8_t res;
+
 int16_t bytes_read;
 
 
@@ -79,17 +80,20 @@ void plat_net_disconnect() {
 
 /*-----------------------------------------------------------------------*/
 bool plat_net_update() {
-
+    
+     
     if( network_status( devicespec, &bytes_waiting, &conn_status, &err ) == FN_ERR_OK ) {
-        if( conn_status && bytes_waiting ) {
-            bytes_read = network_read( devicespec, rxbuf, bytes_waiting < sizeof( rxbuf ) ? bytes_waiting : sizeof( rxbuf ) );
-            if( bytes_read < 0 ) {
-                return 1;
+        if( conn_status  ){
+            if(  bytes_waiting ) {
+                bytes_read = network_read( devicespec, rxbuf, bytes_waiting < sizeof( rxbuf ) ? bytes_waiting : sizeof( rxbuf ) );
+                if( bytes_read < 0 ) {
+                    return 1;
+                }
+                if( bytes_read > 0 ) {
+                  fics_tcp_recv( rxbuf, bytes_read ); 
+                }
+                return 0;
             }
-            if( bytes_read > 0 ) {
-              fics_tcp_recv( rxbuf, bytes_read ); 
-            }
-            return 0;
         }
     }
     // Got an error if we're here. network_status returns either FN_ERR_OK or FN_ERR_IO_ERROR.
