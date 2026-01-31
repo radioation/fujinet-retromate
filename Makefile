@@ -1,6 +1,6 @@
 PRODUCT = retromat
 # PLATFORMS = coco apple2 atari c64 adam msdos msxrom
-PLATFORMS = apple2 atari 
+PLATFORMS = apple2 atari c64
 
 # You can run 'make <platform>' to build for a specific platform,
 # or 'make <platform>/<target>' for a platform-specific target.
@@ -40,3 +40,4 @@ include makefiles/toplevel-rules.mk
 
 LDFLAGS_EXTRA_ATARI = -C src/atari/atari.cfg --mapfile ./fnrm_atari.map -Ln ./fnrm_atari.lbl --debug-info  -Wl -D__SYSTEM_CHECK__=1
 LDFLAGS_EXTRA_APPLE2 = -C apple2-hgr.cfg  --mapfile ./fnrm_apple.map -Ln ./fnrm_apple.lbl  -Wl -D,__HIMEM__=0xBF00
+LDFLAGS_EXTRA_C64 =  --mapfile ./fnrm_c64.map -Ln ./fnrm_c64.lbl  -Wl -D,__HIMEM__=0xC000
