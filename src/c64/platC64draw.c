@@ -309,12 +309,14 @@ void plat_draw_set_text_bg_color(uint8_t color) {
 void plat_draw_splash_screen() {
     uint8_t title1_len = strlen(global.text.title_line1);
     uint8_t title2_len = strlen(global.text.title_line2);
+    uint8_t title3_len = strlen(global.text.title_line3);
 
     // Show credits and wait for key press
     plat_draw_text((SCREEN_TEXT_WIDTH - title1_len) / 2, SCREEN_TEXT_HEIGHT / 2 - 1, global.text.title_line1, title1_len);
     hires_color((SCREEN_TEXT_WIDTH - title1_len) / 2, SCREEN_TEXT_HEIGHT / 2 - 1, title1_len, 1, COLOR_WHITE<<4|COLOR_GREEN);
     c64.draw_colors = COLOR_GREEN;
-    plat_draw_text((SCREEN_TEXT_WIDTH - title2_len) / 2, SCREEN_TEXT_HEIGHT / 2 + 1, global.text.title_line2, title2_len);
+    plat_draw_text((SCREEN_TEXT_WIDTH - title2_len) / 2, SCREEN_TEXT_HEIGHT / 2 , global.text.title_line2, title2_len);
+    plat_draw_text((SCREEN_TEXT_WIDTH - title3_len) / 2, SCREEN_TEXT_HEIGHT / 2 + 1, global.text.title_line3, title3_len);
 
     hires_draw(SCREEN_TEXT_WIDTH / 2 - 2, SCREEN_TEXT_HEIGHT / 2 - 6,
                SQUARE_TEXT_WIDTH, SQUARE_TEXT_HEIGHT, ROP_CPY,

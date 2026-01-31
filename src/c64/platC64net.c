@@ -9,10 +9,45 @@
 
 #include <c64.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "../global.h"
 
 #include "platC64.h"
+
+#include "fujinet-network.h"
+
+char devicespec[64];
+char rxbuf[1518]; // ip_65 eth_buffer.s .res 1518 &  drivers/ethernetcombo.s drivers/ethernet.s stax #1518
+uint16_t bytes_waiting;
+uint8_t conn_status;
+uint8_t err;
+uint8_t tick;
+uint8_t res;
+int16_t bytes_read;
+
+char* fn_strerror( uint8_t e ) {
+    switch (e)
+    {
+        case FN_ERR_OK:
+            return "OK";
+        case FN_ERR_IO_ERROR:
+            return "IO Error";
+        case FN_ERR_BAD_CMD:
+            return "bad cmd";
+        case FN_ERR_OFFLINE:
+           return "offline";
+        case FN_ERR_WARNING:
+           return "Warning issued";
+        case FN_ERR_NO_DEVICE:
+           return "no device";
+        default:
+            return "Unknown";
+    }
+}
+
+
 
 /*-----------------------------------------------------------------------*/
 static int plat_net_make_ascii(const char *text) {
@@ -38,66 +73,67 @@ static int plat_net_make_ascii(const char *text) {
     return i;
 }
 
-#if USE_IP65
-
-#include <ip65.h>
 
 /*-----------------------------------------------------------------------*/
 void plat_net_init() {
-    if (ip65_init(ETH_INIT_DEFAULT)) {
-        log_add_line(&global.view.terminal, "Initializing Network", -1);
+    res = network_init();
+
+    if ( res ) { // returns status/error FN_ERR_* values  FN_ERR_OK ==0x00, so non zero is error
+        log_add_line(&global.view.terminal, "Init Network", -1);
         plat_draw_log(&global.view.terminal, 0, 0, false);
-        app_error(true, ip65_strerror(ip65_error));
+        app_error(true, fn_strerror(res));
     }
 }
 
+
 /*-----------------------------------------------------------------------*/
 void plat_net_connect(const char *server_name, int server_port) {
-    uint32_t server;
+    strcpy( devicespec, "N:TELNET://");
+    strcat( devicespec, server_name );
+    strcat( devicespec, ":" );
+    itoa( server_port,  devicespec + strlen(devicespec), 10 );
 
-    log_add_line(&global.view.terminal, "Obtaining IP address", -1);
+    log_add_line(&global.view.terminal, "Connect to server", -1);
+    log_add_line(&global.view.terminal, devicespec, -1);
     plat_draw_log(&global.view.terminal, 0, 0, false);
-    if (dhcp_init()) {
-        app_error(true, ip65_strerror(ip65_error));
-    }
 
-    log_add_line(&global.view.terminal, "Resolving Server", -1);
-    plat_draw_log(&global.view.terminal, 0, 0, false);
-    server = dns_resolve(server_name);
-    if (!server) {
-        app_error(false, ip65_strerror(ip65_error));
+    res = network_open( devicespec, OPEN_MODE_RW, OPEN_TRANS_NONE );
+    if( res ) {
+        app_error(true, fn_strerror(res));
     }
-
-    log_add_line(&global.view.terminal, "Connecting to server", -1);
-    plat_draw_log(&global.view.terminal, 0, 0, false);
-    if (tcp_connect(server, server_port, fics_tcp_recv)) {
-        app_error(false, ip65_strerror(ip65_error));
-    }
-
-    log_add_line(&global.view.terminal, "Logging in, please be patient", -1);
+    log_add_line(&global.view.terminal, "Logging in", -1);
     plat_draw_log(&global.view.terminal, 0, 0, false);
 }
 
 /*-----------------------------------------------------------------------*/
 void plat_net_disconnect() {
-    tcp_close();
+    network_close(devicespec);
+    
 }
 
 /*-----------------------------------------------------------------------*/
 bool plat_net_update() {
-    if (ip65_process()) {
-        // I am not sure what erors could be returned here
-        if (ip65_error >= IP65_ERROR_PORT_IN_USE) {
-            return 1;
+    if( network_status( devicespec, &bytes_waiting, &conn_status, &err ) == FN_ERR_OK ) {
+        if( conn_status && bytes_waiting ) {
+            bytes_read = network_read( devicespec, rxbuf, bytes_waiting < sizeof( rxbuf ) ? bytes_waiting : sizeof( rxbuf ) );
+            if( bytes_read < 0 ) {
+                return 1;
+            }
+            if( bytes_read > 0 ) {
+              fics_tcp_recv( rxbuf, bytes_read ); 
+            }
+            return 0;
         }
     }
-    return 0;
+    // Got an error if we're here. network_status returns either FN_ERR_OK or FN_ERR_IO_ERROR.
+    return 1;
 }
 
 /*-----------------------------------------------------------------------*/
 void plat_net_send(const char *text) {
     log_add_line(&global.view.terminal, text, -1);
-    tcp_send((unsigned char *)c64.send_buffer, plat_net_make_ascii(text));
+    //tcp_send((unsigned char *)c64.send_buffer, plat_net_make_ascii(text));
+    network_write( devicespec, (unsigned char *)c64.send_buffer, plat_net_make_ascii(text));
 }
 
 /*-----------------------------------------------------------------------*/
@@ -105,50 +141,3 @@ void plat_net_shutdown() {
     plat_net_disconnect();
 }
 
-#elif USE_TR
-
-// Assembly functions in swlinkC64.s
-extern void sw_init(void);
-extern void sw_send(uint8_t len);
-extern void sw_shutdown(void);
-
-void plat_net_init() {
-    sw_init();
-}
-
-void plat_net_connect(const char *host, int port) {
-    int len;
-    UNUSED(port);
-
-    strcpy(c64.send_buffer, "atdt");
-    strcat(c64.send_buffer, host);
-    strcat(c64.send_buffer, ":");
-    strcat(c64.send_buffer, global.ui.server_port_str);
-    strcat(c64.send_buffer, "\n");
-    len = strlen(c64.send_buffer);
-    // Don't go through plat_net_send because this isn't ascii
-    sw_send(len);
-}
-
-void plat_net_disconnect() {
-    plat_net_shutdown();
-}
-
-// This does not check that the head doesn't catch the tail
-// It assumes the buffer is big enough, also assumes
-// all data sent is <= 255 bytes
-void plat_net_send(const char *text) {
-    uint8_t len = plat_net_make_ascii(text);
-    log_add_line(&global.view.terminal, text, -1);
-    sw_send(len);
-}
-
-void plat_net_shutdown() {
-    sw_shutdown();  // Reset the modem
-    if(!global.app.quit) {
-        // If the app isn't quitting, restart the swiftlink
-        sw_init();
-    }
-}
-
-#endif
