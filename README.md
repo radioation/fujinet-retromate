@@ -1,10 +1,11 @@
 # FujiNet-RetroMate
-This is a fork of [RetroMate](https://github.com/StewBC/retromate) for use with 
+This is a fork of [RetroMate](https://github.com/StewBC/retromate) an [IP65](https://github.com/cc65/ip65)
+Free Internet Chess client. It has been modified to work with
 [FujiNet](https://github.com/FujiNetWIFI) network adapters.
 
 
 ## Code & Development  
-The original Apple II, Atari, and C64 versions were created by Stefan Wessels with `cc65` and written mostly in C. The high-resolution drawing code - originally created in 6502 assembly, by Oliver Schmidt, for `cc65-Chess` is reused here.
+The original Apple II, Atari, and C64 versions of RetroMate were created by Stefan Wessels with `cc65` and written mostly in C. The high-resolution drawing code - originally created in 6502 assembly, by Oliver Schmidt, for `cc65-Chess` is reused here.
 
 
 ## What is FICS, the Free Internet Chess Server?  
@@ -12,15 +13,14 @@ FICS is a free chess matchmaking service hosted at `freechess.org:5000` using Te
 
 
 ## Platforms  
-As of 10 December 2025, FujiNet-RetroMate runs on:
+As of 30 January 2026, FujiNet-RetroMate runs on:
 - Atari 8-bit computers with at least 48K RAM.
+- Apple II computers with at least 48K RAM
 
-Apple II, Commodore 64 and other FujiNet retro computers to follow.
-
+Commodore 64 and other FujiNet computers to follow.
 
 ## Requirements: Hardware / Emulators  
 This project uses FujiNet, so you’ll need a FujiNet device, or an emulator with FujiNet support. 
-
 
 Recommended emulators for FujiNet
 
@@ -60,12 +60,16 @@ Use the menu or press `TAB` or `CTRL+T` to switch to the Telnet terminal. Here y
 
 #### Useful Terminal Commands  
 - `finger`: View your account info (e.g., GuestXXXX)  
+- `who`: lists all users logged on. Names followed by a (C) indicate a Computer Account.
 - `match <user>`: Challenge a specific user  
+  - `match <user> <minutes> <increment> <variant>` : Challenge a user and set Start Time, Increment Time, and game variant
+  - `match <user> <rated|unrated> <time> <increment> <White|Black> <variant>` : Challenge a user and set Rated/Unrated, Start Time, Increment Time, side, and game variant
 - `games`: List all active games  
 - `observe <game#>`: Watch a game in progress  
 - `unobserve [game#]`: Stop watching a game  
 - `resign`, `abort`: Resign or request abort  
-- `say <text>`: Send message to your opponent  
+- `say <text>`: Send message to your opponent. Will display in terminal and in the Status area.
+- `tell <user> <text>`: Send message to user. Will display in terminal.
 - `sought`: View active seeks  
 - `seek [params]`: Advertise a new game request  
 - `refresh`, `logout`, `help [subject]`  
@@ -91,17 +95,16 @@ Even when it’s not your turn, you can select a piece to prepare your move - us
 ## Building FujiNet-RetroMate  
 FujiNet RetroMate is built with [MekkoGX](https://github.com/FozzTexx/MekkoGX)
 
-### Atari build instructions
 
 The [FujiNet wiki](https://fujinet.online/wiki/?p=Development-Env-for-Apps) has some
 setup instructions for development environments
 
+### Atari build instructions
 1. Install dependencies
-
 
 Fedora 43:
 ```bash
-sudo dnf install make gcc  atasm clang++
+sudo dnf install make gcc atasm clang++
 ```
 
 Ubuntu 24.04:
@@ -121,8 +124,7 @@ make
 sudo make avail
 ```
 
-
-3. build  dir2atr
+3. build `dir2atr`
 
 Ubuntu does not appear to have an atasm package so build it:
 ```bash
@@ -152,8 +154,47 @@ git clone https://github.com/radioation/fujinet-retromate.git
 cd fujinet-retromate
 make
 ```
-If successful an `.atr` file will created  at `r2r/atari/fn_retromate.atr`
+If successful an `.atr` file will created  at `r2r/atari/retromat.atr`
 
+### Apple build instructions
+1. Install dependencies
+
+Fedora 43:
+```bash
+sudo dnf install make gcc atasm clang++
+```
+
+Ubuntu 24.04:
+```bash
+sudo apt install git make gcc clang zlib1g-dev curl
+```
+*Note* you can probably get by with g++ instead of clang++. I'm using 
+clang++ based on the on the FujiNet wiki `dir2atr` instructions.
+
+2. Get the latest cc65
+
+```c
+git clone https://github.com/cc65/cc65.git
+cd cc65
+make
+sudo make avail
+```
+
+3. Get Apple Commander
+ Install [Apple Commander](https://applecommander.github.io/install/) on your machine.
+ Releases can be found at [github](https://github.com/AppleCommander/AppleCommander/releases).
+
+ Download the `ac` and `acx`.zip files appropriate for you system. Unzip them and copy/rename the 
+ ac-linux-xxxx-vv.v and acx-linux-xxxx-vv.v to a directory in your `${PATH}` as `ac` and `acx`
+
+4. Clone and build fujinet-retromate
+
+```bash
+git clone https://github.com/radioation/fujinet-retromate.git
+cd fujinet-retromate
+make
+```
+If successful a `.po` file will created  at `r2r/apple2/retroma.po`
 
 
 ## Screenshots
@@ -167,8 +208,5 @@ If successful an `.atr` file will created  at `r2r/atari/fn_retromate.atr`
 ![Atari Screenshot](screenshots/atari-1.png)
 ![Atari Screenshot](screenshots/atari-0.png)
 
-### Commodore 64  
-![Commodore 64 Screenshot](screenshots/c64-0.png)
-![Commodore 64 Screenshot](screenshots/c64-1.png)
-![Commodore 64 Screenshot](screenshots/c64-2.png)
+
 
