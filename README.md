@@ -15,7 +15,7 @@ FICS is a free chess matchmaking service hosted at `freechess.org:5000` using Te
 ## Platforms  
 As of 30 January 2026, FujiNet-RetroMate runs on:
 - Atari 8-bit computers with at least 48K RAM.
-- Apple II computers with at least 48K RAM
+- Apple II computers with at least 64K RAM
 
 Commodore 64 and other FujiNet computers to follow.
 
