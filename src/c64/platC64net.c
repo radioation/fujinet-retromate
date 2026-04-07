@@ -36,6 +36,7 @@ bool connected = false;
 uint16_t network_bw;
 uint8_t network_conn;
 uint8_t network_error;
+uint8_t tick = 0;
 
 /*-----------------------------------------------------------------------*/
 char* cbm_strerror( uint8_t e ) {
@@ -147,6 +148,8 @@ void plat_net_connect(const char *server_name, int server_port) {
     res = cbm_open( LFN, DEV, SAN, url);
     if ( res ) {
         app_error(false, cbm_strerror(res));
+    } else {
+        connected = true;
     }
 
     log_add_line(&global.view.terminal, "Logging in, please be patient", -1);
@@ -163,36 +166,28 @@ void plat_net_disconnect() {
 bool plat_net_update() {
     int16_t retval;
     uint8_t *bufptr;
+    tick++;
+    if( tick < 255 ) {
+        return 0;
+    } 
+    tick = 0;
+
     if( trip ) {
         retval = cbm_read( LFN, rxbuf, sizeof( rxbuf ) );
+        // ( see cbm.h : read up to size of buffer. Returns 
+        // number of read bytes.  0 means no-bytesleft/end-of-file; -1 means error.
         if( retval < 0 ) {
+            // bad read, check the network status in this case.
             get_network_status( &network_bw, &network_conn, & network_error );
             connected = network_conn;
         } else {
-            fics_tcp_recv( rxbuf, retval );
+            if( retval > 0 ) fics_tcp_recv( rxbuf, retval );
             return 0;
         }
+        
     }
+    return !connected; // Flip logic. Original RM returned 1 for error condition. 
   
-    return connected;
-    /*
-    if( get_network_status( &bytes_waiting, &conn_status, &err ) == 0 ) {
-        if( conn_status  ){
-            if(  bytes_waiting ) {
-                bytes_read = cbm_read( LFN, rxbuf, bytes_waiting < sizeof( rxbuf ) ? bytes_waiting : sizeof( rxbuf ) );
-                if( bytes_read < 0 ) {
-                    return 1;
-                }
-                if( bytes_read > 0 ) {
-                  fics_tcp_recv( rxbuf, bytes_read );
-                }
-                return 0;
-            }
-        }
-    }
-    // Got an error if we're here. network_status returns either FN_ERR_OK or FN_ERR_IO_ERROR.
-    return 1;
-    */
 
 
 }
